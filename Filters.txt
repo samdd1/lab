@@ -1,0 +1,95 @@
+Implementation of IIR Filter
+clc;
+clear all
+close all
+h=fir1(33,150/(1000/2),hamming(34));        To find Impulse Response
+n=1:30;
+f1=50; f2=300; f3=200; fs=1000;
+x=[];
+x1=sin(2*pi*n*f1/fs);
+x2=sin(2*pi*n*f2/fs);
+x3=sin(2*pi*n*f3/fs);
+x=[x1 x2 x3];
+subplot(2,1,1);
+stem(x);
+title('Input signal')
+y=filter(h,1,x)   
+%y=conv(h,x)
+subplot(2,1,2);
+stem(y);
+title('Output signal')
+
+Design of FIR filter
+clc;
+clear all
+close all
+wpa=input('Enter passband frequency in Hz');
+wsa=input('Enter stopband frequency in Hz');
+ws1=input('Enter Sampling frequency in Hz');
+wpd=2*pi*wpa/ws1;                                      Analog to Digital Conversion
+wsd=2*pi*wsa/ws1;
+tb=wsd-wpd;                                                  Transmission Bandwidth
+fb=1/tb;
+N=ceil(6.6*pi*fb);                                         Order of the filter
+Wc=(wsd+wpd)/2;
+wc=Wc/pi;                                                     Cutoff Frequency
+hw=hamming(N+1);                                      Hamming window
+stem(hw);
+title('Hamming window');
+h=fir1(N,wc,hamming(N+1));                       Impulse Response
+figure(2);
+[m,w]=freqz(h,1,128);
+mag=20*log10(abs(m));                                Magnitude in dB
+plot(ws1*w/(2*pi),mag);                               Digital to Analog frequency
+title('FIR frequency Response');
+grid on;
+
+Implementation of IIR Filter
+[b,a]=butter(2,150/(1000/2));  
+n=1:30;
+f1=100; f2=300; f3=170; fs=1000;
+x=[];
+x1=sin(2*pi*n*f1/fs);
+x2=sin(2*pi*n*f2/fs);
+x3=sin(2*pi*n*f3/fs);
+x=[x1 x2 x3];
+subplot(2,1,1);
+stem(x);
+title('Input signal')
+y=filter(b,a,x)     
+subplot(2,1,2);
+stem(y);
+title('Output signal')
+
+Design of IIR Filter
+Butterworth Approximation
+rp=1, rs=40, w1=800, w2=1200, ws=3600;
+aw1=2*pi*w1/ws;                                                 Analog to Digital Conversion
+aw2=2*pi*w2/ws;
+pw1=2*tan(aw1/2);                                                Pre warpping
+pw2=2*tan(aw2/2);
+[n,wc]=buttord(pw1,pw2,rp,rs,'s');                        Order and Cutoff frequency
+[b,a]=butter(n,wc,'s');                                             Numerator and Denominator
+fs=1;
+[num,den]=bilinear(b,a,fs);                         Converting from S Domain to Z Domain using BT
+[mag,freq1]=freqz(num,den,128);                         Magnitude and frequency
+freq=freq1*ws/(2*pi);                                            Digital to Analog frequency
+m=20*log10(abs(mag));                                        Magnitude in dB
+plot(freq,m);
+grid;
+
+Chebyshev Approximation
+rp=1, rs=40, w1=800, w2=1200, ws=3600;
+aw1=2*pi*w1/ws;                                                Analog to Digital Conversion
+aw2=2*pi*w2/ws;
+pw1=2*tan(aw1/2);                                              Pre warpping
+pw2=2*tan(aw2/2);
+[n,wc]=cheb1ord(pw1,pw2,rp,rs,'s');                   Order and Cutoff frequency
+[b,a]=cheby1(n,rp,wc,'s');                                    Numerator and Denominator
+fs=1;
+[num,den]=bilinear(b,a,fs);                     Converting from S Domain to Z Domain using BT
+[mag,freq1]=freqz(num,den,128);                       Magnitude and frequency
+freq=freq1*ws/(2*pi);                                          Digital to Analog frequency
+m=20*log10(abs(mag));                                      Magnitude in dB
+plot(freq,m);
+grid;

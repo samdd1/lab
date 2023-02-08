@@ -1,0 +1,168 @@
+﻿i) Overlap Save Method
+close all;
+clear all;
+x=input('Enter First Sequence x[n]= ');
+h=input('Enter Second Sequence h[n]= ');
+N=input('Enter length of each block N = ');
+ 
+%Ploting the Input Sequences
+subplot (2,2,1);
+stem(x);
+title('First Sequence x[n]');
+xlabel ('Samples');
+ylabel ('Amplitude');
+ 
+subplot (2,2,2);
+stem(h);
+title('Second Sequence h[n]');
+xlabel ('Samples');
+ylabel ('Amplitude');
+ 
+Lx=length(x);
+M=length(h);
+L=N-M+1;
+K=ceil(Lx/L)+1;
+R=rem(Lx,N);
+ 
+%Padding zeros to input sequences to make length equal to N
+ 
+x=[x zeros(1,L)]
+h=[h zeros(1,N-M)]
+ 
+%To pad zeros to Input sequence at the end of the sequence
+z=zeros(1,M-1);
+ 
+for i=1:K
+     X(i,:)=x(((i-1)*L+1):i*L);
+     if i==1
+        Xi(i,:)=[zeros(1,M-1) X(i,:)];
+    else 
+        Xi(i,:)=[X(i-1,(L-M+2):L) X(i,:)];        
+    end
+    Yi(i,:)=cconv(Xi(i,:),h,N);                                           Yi(i,:)=C_Conv(Xi(i,:),h);
+end
+ 
+U=Yi(:,M:N);
+y1=U';
+y=y1(:)'
+ 
+%Plotting of the Convoled Signal
+subplot (2,2,3:4);
+stem(y);
+title ('Convolved Signal');
+xlabel ('Samples');
+ylabel ('Amplitude');
+ 
+Result:
+Enter First Sequence x[n]= [1 2 -1 2 3 -2 -3 -1 1 1 2 -1]
+Enter Second Sequence h[n]= [1 2 3]
+Enter length of each block N = 4
+x =     1     2    -1     2     3    -2    -3    -1     1     1     2    -1     0     0
+h =     1     2     3     0
+y =     1     4     6     6     4    10     2   -13   -10     0     7     6     4    -3
+
+
+
+
+ii) Overlap Add Method
+close all;
+clear all;
+x=input('Enter First Sequence x[n]= ');
+h=input('Enter Second Sequence h[n]= ');
+N=input('Enter length of each block N = ');
+ 
+Lx=length(x);
+M=length(h);
+L=N-M+1;
+K=ceil(Lx/L);
+R=rem(Lx,L);
+ 
+%Padding zeros to input sequences to make length equal to N
+if R>0
+    x=[x zeros(1,L-R)]
+end
+h=[h zeros(1,N-M)]
+ 
+%Initialising the Output
+y=zeros(N,K);
+%Padding zeros to Input sequence at the end of the sequence
+z=zeros(1,M-1);
+ 
+%To perform Circular Convolution of two input sequences
+for i=0:K-1
+    Xn=x(L*i+1:L*i+L);
+    Xi=[Xn z];
+    u(i+1,:)=cconv(Xi,h,N);                                        u(i+1,:)=C_Conv(Xi(i,:),h);
+end
+ 
+Y=u';
+ 
+for i=1:K-1
+    u(i+1,1:M-1)= u(i,M:N)+u(i+1,1:M-1);
+end
+ 
+z1=u(:,1:L)';
+y1=(z1(:))';
+y=[y1 u(K,(M:N))]
+ 
+%Ploting the Input Sequences
+subplot (2,2,1);
+stem(x);
+title('First Sequence x[n]');
+xlabel ('Samples');
+ylabel ('Amplitude');
+ 
+subplot (2,2,2);
+stem(h);
+title('Second Sequence h[n]');
+xlabel ('Samples');
+ylabel ('Amplitude');
+ 
+%Plotting of the Convoled Signal
+subplot (2,2,3:4);
+stem(y);
+title ('Convolved Signal');
+xlabel ('Samples');
+ylabel ('Amplitude');
+
+Result:
+Enter First Sequence x[n]= [1 2 -1 2 3 -2 -3 -1 1 1 2 -1]
+Enter Second Sequence h[n]= [1 2 3]
+Enter length of each block N = 4
+h = 1     2     3     0
+y = 1     4     6     6     4    10     2   -13   -10     0     7     6     4    -3
+
+
+
+
+Note:
+C_Conv : Name of the file containing Circular Convolution
+
+Circular COnvolution Altered Program for Overlap Add and Save Method saved as C_Conv.m
+
+function y=C_Conv1(x1,x2)
+
+Lx1=length(x1);
+Lx2=length(x2);
+len=max(Lx1,Lx2);
+if Lx1<len
+    x1=[x1,zeros(len-Lx1)];
+else
+    x2=[x2,zeros(len-Lx2)];
+end
+ 
+for n=1:len
+    y(n)=0;
+    for k=1:len
+        i=n-k+1;
+        if(i<=0)
+            i=i+len;
+        end
+        y(n)=y(n)+x2(k)*x1(i);
+    end
+end
+disp('Circular Convolution of x1[n] & x2[n] is ')
+disp(y)
+
+
+
